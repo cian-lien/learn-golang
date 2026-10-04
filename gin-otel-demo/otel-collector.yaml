@@ -1,0 +1,47 @@
+# OpenTelemetry Collector 配置：receiver -> processor -> exporter
+#
+# 应用只会说 OTLP，具体"数据去哪、怎么处理"由 Collector 决定。
+# 好处：以后换后端（Jaeger -> Tempo）、加尾采样、脱敏，都不用改业务代码。
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # 内存保护：放在 batch 之前，超阈值时开始丢数据，而不是把 Collector 撑爆。
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+  # 攒批发送，减少网络往返。生产还可以在这里做 attributes 增删、尾采样。
+  batch:
+    send_batch_size: 1024
+    timeout: 5s
+
+exporters:
+  # 打到 Collector 自己的 stdout，本地确认"数据到底有没有进来"用。
+  debug:
+    verbosity: basic
+  # 转发给 Jaeger（Jaeger v2 原生支持 OTLP）。
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+  # 把指标暴露成 Prometheus 格式：curl :8889/metrics
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    resource_to_telemetry_conversion:
+      enabled: true # 把 service.name 等 resource 属性变成指标 label
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/jaeger, debug]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus, debug]

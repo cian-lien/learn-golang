@@ -1,0 +1,24 @@
+# 只启动"后端"，应用本身用 go run 跑在本机（见 README 第 9 步）。
+#
+#   docker compose up -d
+#   docker compose down
+#
+# 数据流：
+#   gin-otel-demo --OTLP:4317--> otel-collector --OTLP--> jaeger（UI: http://localhost:16686）
+#                                              └--Prometheus 格式--> http://localhost:8889/metrics
+services:
+  jaeger:
+    image: jaegertracing/jaeger:latest
+    ports:
+      - "16686:16686" # Jaeger UI
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    volumes:
+      - ./otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4317:4317" # OTLP/gRPC，应用连这里
+      - "4318:4318" # OTLP/HTTP
+      - "8889:8889" # Prometheus 抓取端点
+    depends_on:
+      - jaeger

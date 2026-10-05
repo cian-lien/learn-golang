@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: learning-app
+    static_configs:
+      # 容器间用服务名 + 容器端口，不是宿主机的 18889。
+      - targets: [collector:8889]

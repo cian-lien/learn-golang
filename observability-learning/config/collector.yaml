@@ -1,0 +1,28 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  batch:
+    timeout: 1s
+
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    # 点号换下划线，并给 Counter / 单位添加 Prometheus 后缀。
+    translation_strategy: UnderscoreEscapingWithSuffixes
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug] # 本课仅输出接收情况，未配置调用链存储后端。

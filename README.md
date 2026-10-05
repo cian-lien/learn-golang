@@ -10,6 +10,7 @@ go/
 │   └── 11_testing           表驱动测试与基准测试（库包）
 ├── 12_observability/       OpenTelemetry 示例：net/http 两个服务 + Collector/Jaeger
 ├── gin-otel-demo/          Gin + OpenTelemetry（独立 module，需要 cd 进去跑）
+├── observability-learning/ Go + OTel + Prometheus + Grafana，五课渐进式实验（独立 module）
 ├── go.mod / go.sum         模块 gobasics（base/ 与 12_observability 属于它）
 └── README.md
 ```
@@ -39,6 +40,7 @@ go test ./base/11_testing -v    # 表驱动测试与基准测试
 | --- | --- | --- |
 | [12_observability](./12_observability/README.md) | 不依赖 Web 框架：`net/http` 两个服务，trace / metric / log 三件套 | `go run ./12_observability -role=user`，另开终端跑 `-role=order` |
 | [gin-otel-demo](./gin-otel-demo/README.md) | Gin 版：handler / service / store 三层埋点，含单元测试与 Collector 配置 | `cd gin-otel-demo && go run .`（独立 module） |
+| [observability-learning](./observability-learning/README.md) | 从普通 HTTP 到 OTel 埋点、Prometheus 查询、Grafana 看板的五课实验 | `cd observability-learning && go run ./cmd/01-http`（独立 module） |
 
 两者都能零依赖起步：加 `OTEL_EXPORTER=console` 就把 span/metric 打到标准输出；
 需要看链路 UI 时，用各自目录里的 `docker compose up -d` 起 Jaeger（<http://localhost:16686>）+ Collector（:4317）。

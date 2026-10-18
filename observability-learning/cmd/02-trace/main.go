@@ -26,15 +26,13 @@ func main() {
 
 	// 2. 创建 Provider：负责提供具有记录能力的 Tracer。
 	provider := sdktrace.NewTracerProvider(
-		// 已结束的 Span 进入队列，由后台批量导出。
-		sdktrace.WithBatcher(exporter),
+		sdktrace.WithSyncer(exporter),
 		// Resource 描述产生这些 Span 的应用。
 		sdktrace.WithResource(resource.NewSchemaless(
 			attribute.String("service.name", "otel-learning"),
 		)),
 	)
 	defer func() {
-		// 程序退出前，等待队列中的 Span 导出并关闭 Provider。
 		if err := provider.Shutdown(ctx); err != nil {
 			log.Print(err)
 		}

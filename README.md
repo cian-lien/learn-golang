@@ -1,58 +1,55 @@
-# Go 学习工作区
+# Go 语言语法入门
+
+一套面向前端开发者的 Go 基础语法讲义，共 6 个部分。每部分都有讲解、代码例子（大量和 JavaScript / TypeScript 对比）、练习和答案。
+
+## 学习路线
+
+| 部分 | 内容 | 核心要点 |
+|---|---|---|
+| [01 程序结构、变量、常量、基本类型](01-basics/README.md) | `package`、`:=`、零值、`iota`、类型转换、`fmt` | `:=` 最常用；变量有零值；类型不会自动转换 |
+| [02 流程控制](02-control-flow/README.md) | `if`、`for`、`switch`、`range` | 不加括号；只有 `for` 一种循环；`switch` 不用 `break` |
+| [03 函数、多返回值、错误处理](03-functions-errors/README.md) | 函数、多返回值、`error`、`defer`、闭包 | 错误作为最后一个返回值，用 `if err != nil` 检查 |
+| [04 数组、切片、map](04-slices-maps/README.md) | 数组、切片、`append`、截取、map | `append` 要赋值回去；截取共享数据；`v, ok :=` |
+| [05 结构体、方法、接口](05-structs-interfaces/README.md) | 结构体、方法、嵌入、接口、`any` | 结构体赋值会复制；改字段用指针接收者；不用写 implements |
+| [06 指针和并发](06-pointers-concurrency/README.md) | 指针、goroutine、`WaitGroup`、channel、`select`、`Mutex` | 传地址才能改原值；main 结束程序就退出；共享变量要加锁 |
+
+建议按顺序学习。每部分先读讲义，做完练习再看答案。
+
+## 如何运行代码
+
+需要安装 Go 1.22 或更高版本。没有安装的话，可以把代码粘贴到官方在线环境 [Go Playground](https://go.dev/play/) 运行。
+
+每个练习的答案都放在单独的文件夹里，可以直接运行：
+
+```bash
+go run ./01-basics/exercise
+go run ./02-control-flow/fizzbuzz
+go run ./06-pointers-concurrency/squares
+```
 
 ## 目录结构
 
-```text
-go/
-├── base/                   Go 语言基础：11 个主题的可运行示例 + 复习正文
-│   ├── Go语言基础复习.md     复习正文（命令都在 go/ 下执行）
-│   ├── 01_vars … 10_stdlib  可运行示例（每个目录一个 main 包）
-│   └── 11_testing           表驱动测试与基准测试（库包）
-├── 12_observability/       OpenTelemetry 示例：net/http 两个服务 + Collector/Jaeger
-├── gin-otel-demo/          Gin + OpenTelemetry（独立 module，需要 cd 进去跑）
-├── observability-learning/ Go + OTel + Prometheus + Grafana，五课渐进式实验（独立 module）
-├── go.mod / go.sum         模块 gobasics（base/ 与 12_observability 属于它）
-└── README.md
+```
+01-basics/                  第 1 部分
+  README.md                 讲义 + 练习 + 答案
+  exercise/main.go          练习代码
+02-control-flow/
+  range-switch/main.go      练习 1：预测输出
+  fizzbuzz/main.go          练习 2：FizzBuzz
+03-functions-errors/
+  defer-calc/main.go        练习 1：defer 与错误
+  parse-age/main.go         练习 2：parseAge
+04-slices-maps/
+  predict/main.go           练习 1：预测输出
+  passed/main.go            练习 2：及格成绩
+05-structs-interfaces/
+  counter/main.go           练习 1：值接收者与指针接收者
+  shapes/main.go            练习 2：Shape 接口
+06-pointers-concurrency/
+  pointer/main.go           练习 1：指针传参
+  squares/main.go           练习 2：并发计算平方和
 ```
 
-## 基础部分（`base/`）
+## 学完之后
 
-复习正文在 [base/Go语言基础复习.md](./base/Go语言基础复习.md)，示例代码按主题分目录。
-所有命令都在本目录（模块根）执行：
-
-```bash
-go run ./base/01_vars           # 变量、常量与零值
-go run ./base/02_types          # 类型转换、字符串与 rune
-go run ./base/03_control        # if / for / switch / 标签 / goto
-go run ./base/04_funcs          # 多返回值、变参、闭包、defer
-go run ./base/05_slice_map      # 数组、切片、map 与共享底层数组
-go run ./base/06_struct_method  # 结构体、值/指针接收者、嵌入
-go run ./base/07_interface_error # 接口、类型断言、错误链
-go run ./base/08_concurrency    # goroutine、channel、select、context
-go run ./base/09_generics       # 类型参数与约束
-go run ./base/10_stdlib         # strings / strconv / sort / time / json
-go test ./base/11_testing -v    # 表驱动测试与基准测试
-```
-
-## 可观测性部分
-
-| 目录 | 内容 | 怎么跑 |
-| --- | --- | --- |
-| [12_observability](./12_observability/README.md) | 不依赖 Web 框架：`net/http` 两个服务，trace / metric / log 三件套 | `go run ./12_observability -role=user`，另开终端跑 `-role=order` |
-| [gin-otel-demo](./gin-otel-demo/README.md) | Gin 版：handler / service / store 三层埋点，含单元测试与 Collector 配置 | `cd gin-otel-demo && go run .`（独立 module） |
-| [observability-learning](./observability-learning/README.md) | 从普通 HTTP 到 OTel 埋点、Prometheus 查询、Grafana 看板的五课实验 | `cd observability-learning && go run ./cmd/01-http`（独立 module） |
-
-两者都能零依赖起步：加 `OTEL_EXPORTER=console` 就把 span/metric 打到标准输出；
-需要看链路 UI 时，用各自目录里的 `docker compose up -d` 起 Jaeger（<http://localhost:16686>）+ Collector（:4317）。
-
-## 常用命令
-
-```bash
-go vet ./...            # 静态检查
-gofmt -l .              # 格式检查
-go test ./... -race     # 全量测试 + 数据竞争检测
-```
-
-模块名 `gobasics`，`go.mod` 声明 `go 1.25`（`12_observability` 依赖的 OpenTelemetry SDK 要求 1.25+，
-`base/` 下的基础示例本身在更低的 Go 版本上也能跑）。
-`gin-otel-demo/` 是独立 module，不参与上面的 `./...`，需要 `cd` 进去单独 build / test。
+下一步建议用标准库 `net/http` 写一个简单的 HTTP 接口（比如待办事项的增删查），把结构体、JSON 标签、错误处理、map、互斥锁串起来用一遍。

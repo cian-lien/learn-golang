@@ -48,8 +48,56 @@ go run ./06-pointers-concurrency/squares
 06-pointers-concurrency/
   pointer/main.go           练习 1：指针传参
   squares/main.go           练习 2：并发计算平方和
+07-todo-api/                综合练习：待办事项 HTTP API
 ```
 
-## 学完之后
+## 07 待办事项 API
 
-下一步建议用标准库 `net/http` 写一个简单的 HTTP 接口（比如待办事项的增删查），把结构体、JSON 标签、错误处理、map、互斥锁串起来用一遍。
+[07-todo-api](07-todo-api/) 使用标准库 `net/http` 实现待办事项的增删查改。服务启动时预置 3 条待办，数据保存在内存中，重启后恢复为预置内容。
+
+### 启动服务
+
+使用 Go 1.22 或更高版本，在仓库根目录运行以下命令。服务监听 `8080` 端口，按 `Ctrl+C` 停止。
+
+```bash
+go run ./07-todo-api
+```
+
+### 接口示例
+
+另开一个终端，按顺序执行下方命令。服务刚启动时，第一条新建待办的 `id` 为 `4`。如果服务已经处理过创建请求，把后续命令中的 `4` 替换为创建响应中的 `id`。
+
+```bash
+# 创建待办（201 Created）
+curl -i http://localhost:8080/todos \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"练习 Go HTTP 接口"}'
+```
+
+创建成功时返回待办对象。
+
+```json
+{"id":4,"title":"练习 Go HTTP 接口","done":false}
+```
+
+```bash
+# 查看全部待办（200 OK）
+curl -i http://localhost:8080/todos
+
+# 查询指定待办（200 OK）
+curl -i http://localhost:8080/todos/4
+
+# 标记为已完成（200 OK）
+curl -i -X PATCH http://localhost:8080/todos/4 \
+  -H 'Content-Type: application/json' \
+  -d '{"done":true}'
+
+# 筛选已完成的待办（200 OK）；改用 done=false 可查看未完成的待办
+curl -i 'http://localhost:8080/todos?done=true'
+
+# 删除待办（204 No Content）
+curl -i -X DELETE http://localhost:8080/todos/4
+
+# 再次查询已删除的待办（404 Not Found）
+curl -i http://localhost:8080/todos/4
+```
